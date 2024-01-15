@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="faz()">
+    <script>
+        function faz() {
+            fetchData();
+        };
+
+        async function fetchData() {
+            try {
+                const response = await fetch("https://api.jikan.moe/v4/top/anime");
+                const object = await response.json();
+                const animeList = object.data;
+                //console.log(animeList)
+                createPage(animeList);
+            } catch (error) {
+                console.log("Error fetching data");
+            }
+        }
+
+        function createPage(animeList) {
+            //creat header
+            const header = document.createElement("header");
+            header.textContent = "Anime List";
+            document.body.prepend(header);
+            //creat main
+            const main = document.createElement("main");
+            document.body.append(main);
+            // creat footer date
+            let footer = document.createElement(`footer`);
+            let fullDate = new Date();
+            let year = fullDate.getFullYear();
+            footer.innerHTML = `&copy Carlos Lima ${year}`;
+            document.body.append(footer);
+
+            //filter animebyscore
+            const animeByScore = animeList.filter((score => score.score > 9))
+            console.log(animeByScore)
+
+            animeByScore.forEach(anime => {
+                const card = document.createElement("div");
+                card.className = "card";
+                main.prepend(card);
+
+                const title = document.createElement("h2");
+                title.textContent = anime.title;
+                card.append(title);
+
+                const image = document.createElement("img");
+                image.src = anime.images.jpg.image_url;
+                image.alt = anime.title;
+                card.append(image);
+
+                //side bar opening
+                card.addEventListener(`click`, (event) => {
+                    event.preventDefault();
+                    let sideBar = document.createElement(`div`);
+                    document.body.append(sideBar);
+                    sideBar.classList.add(`sidebar`);
+                    let tap = document.createElement(`h1`);
+                    tap.innerHTML = `Tap to close!`
+                    sideBar.appendChild(tap);
+
+                    // video
+                    const video = document.createElement(`iframe`);
+                    video.src = anime.trailer.embed_url;
+                    sideBar.append(video);
+
+                    //producers
+                    let p1 = document.createElement(`p`)
+                    sideBar.prepend(p1);
+                    let producers = anime.producers;
+                    let mapProducers = producers.map(producer => producer.name);
+                    p1.prepend(`Producers:${mapProducers}`);
+                    // rating
+                    let p2 = document.createElement(`p`);
+                    sideBar.prepend(p2);
+                    let rating = anime.rating;
+                    p2.prepend(`Rating: ${rating}`);
+                    //date
+                    let p3 = document.createElement(`p`);
+                    sideBar.prepend(p3);
+                    let date = anime.year;
+                    p3.prepend(`Data de lançamento: ${date}`);
+                    //genres
+                    let p4 = document.createElement(`p`);
+                    sideBar.prepend(p4);
+                    let animeBYName = anime.genres;
+                    let byGenres = animeBYName.map(name => {
+                        return name.name
+                    })
+                    p4.prepend(`Generos:${byGenres}`);
+                    //nome
+                    let p5 = document.createElement(`p`);
+                    sideBar.prepend(p5);
+                    let animeTitle = anime.title;
+                    p5.prepend(`Nome do anime: ${animeTitle}`);
+                    // close sideBar
+                    sideBar.addEventListener(`click`, () => {
+                        p1.innerHTML = '';
+                        p2.innerHTML = '';
+                        p3.innerHTML = '';
+                        p4.innerHTML = '';
+                        p5.innerHTML = '';
+                        sideBar.remove()
+                    })
+                })
+            });
+
+
+        }
+
+    </script>
+
+</body>
+
+
+</html>
